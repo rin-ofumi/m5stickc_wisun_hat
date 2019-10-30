@@ -5,7 +5,7 @@ MicroPython project / Wi-SUN HAT & M5StickC / Data storage uses Ambient
 
 # <概要>
 
-![Ambient_WISUN_0](https://kitto-yakudatsu.com/wp/wp-content/uploads/2019/10/Wi-SUN構成イメージ.png)
+![Ambient_WISUN_0](https://kitto-yakudatsu.com/wp/wp-content/uploads/2019/10/Wi-SUN構成イメージ2.png)
 
 <br>
 
