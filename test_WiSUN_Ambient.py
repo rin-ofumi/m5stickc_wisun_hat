@@ -41,6 +41,17 @@ AMPERE_RED              = 0.7   # 契約ブレーカー値に対し、どれく�
 AMPERE_LIMIT            = 30    # 契約ブレーカー値のデフォルト値
 
 
+# @cinimlさんのファーム差分吸収ロジック
+class AXPCompat(object):
+    def __init__(self):
+        if( hasattr(axp, 'setLDO2Vol') ):
+            self.setLDO2Vol = axp.setLDO2Vol
+        else:
+            self.setLDO2Vol = axp.setLDO2Volt
+
+axp = AXPCompat()
+
+
 # 時計表示スレッド関数
 def time_count ():
     global Disp_mode
@@ -181,17 +192,15 @@ def wisun_set_filechk():
                     BRPSWD = str(filetxt[1])
                     print('- BRPSWD: ' + str(BRPSWD))
                 elif filetxt[0] == 'AM_ID_1' :
-                    if len(filetxt[1]) == 5 :
-                        AM_ID_1 = str(filetxt[1])
-                        print('- AM_ID_1: ' + str(AM_ID_1))
+                    AM_ID_1 = str(filetxt[1])
+                    print('- AM_ID_1: ' + str(AM_ID_1))
                 elif filetxt[0] == 'AM_WKEY_1' :
                     if len(filetxt[1]) == 16 :
                         AM_WKEY_1 = str(filetxt[1])
                         print('- AM_WKEY_1: ' + str(AM_WKEY_1))
                 elif filetxt[0] == 'AM_ID_2' :
-                    if len(filetxt[1]) == 5 :
-                        AM_ID_2 = str(filetxt[1])
-                        print('- AM_ID_2: ' + str(AM_ID_2))
+                    AM_ID_2 = str(filetxt[1])
+                    print('- AM_ID_2: ' + str(AM_ID_2))
                 elif filetxt[0] == 'AM_WKEY_2' :
                     if len(filetxt[1]) == 16 :
                         AM_WKEY_2 = str(filetxt[1])
@@ -272,14 +281,6 @@ lcd.print('*', 0, 0, lcd.WHITE)
 print('>> WiFi init OK')
 
 
-# BP35A1 UART設定
-bp35a1 = machine.UART(1, tx=0, rx=36) # Wi-SUN HAT rev0.1用
-#bp35a1 = machine.UART(1, tx=0, rx=26)
-bp35a1.init(115200, bits=8, parity=None, stop=1, timeout=2000)
-lcd.print('**', 0, 0, lcd.WHITE)
-print('>> UART init OK')
-
-
 # UDPデータインスタンス生成
 u = wisun_udp.udp_read()
 print('>> UDP reader init OK')
@@ -294,13 +295,28 @@ if (AM_ID_2 is not None) and (AM_WKEY_2 is not None) : # Ambient_2の設定情�
     import ambient
     am_total_power = ambient.Ambient(AM_ID_2, AM_WKEY_2)
     print('>> Ambient_2 init OK')
+lcd.print('**', 0, 0, lcd.WHITE)
+
+
+# BP35A1 UART設定
+bp35a1 = machine.UART(1, tx=0, rx=36) # Wi-SUN HAT rev0.1用
+#bp35a1 = machine.UART(1, tx=0, rx=26)
+bp35a1.init(115200, bits=8, parity=None, stop=1, timeout=2000)
 lcd.print('***', 0, 0, lcd.WHITE)
+print('>> UART init OK')
+
+# UARTの送受信バッファーの塵データをクリア
+utime.sleep(0.5)
+if bp35a1.any() != 0 :
+    dust = bp35a1.read()
+bp35a1.write('\r\n')
+utime.sleep(0.5)
+print('>> UART RX/TX Data Clear!')
 
 
 # BP35A1の初期設定 - コマンドエコーバックをオンにする
 bp35a1.write('SKSREG SFE 1\r\n')
 utime.sleep(0.5)
-
 while True :    #Echo back & OK wait!
     line = None
     if bp35a1.any() != 0 :
@@ -624,6 +640,7 @@ while True:
     if bp35a1.any() != 0 :
         line = bp35a1.readline()
         u.read(line)
+#        print(line) #全ログ取得デバッグ用
         if u.type == 'E7' : # [E7]なら受信データは瞬時電力計測値
             data_mute = False
             draw_w()

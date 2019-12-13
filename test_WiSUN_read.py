@@ -17,16 +17,23 @@ now_power               = 0             # グローバル
 now_power_time          = utime.time()
 
 
+# @cinimlさんのファーム差分吸収ロジック
+class AXPCompat(object):
+    def __init__(self):
+        if( hasattr(axp, 'setLDO2Vol') ):
+            self.setLDO2Vol = axp.setLDO2Vol
+        else:
+            self.setLDO2Vol = axp.setLDO2Volt
+
+axp = AXPCompat()
+
+
 # 時計表示スレッド関数
 def time_count ():
     global Disp_mode
-    global Am_err
     
     while True:
-        if Am_err == 0 : # Ambient通信不具合発生時は時計の文字が赤くなる
-            fc = lcd.WHITE
-        else :
-            fc = lcd.RED
+        fc = lcd.WHITE
 
         if Disp_mode == 1 : # 表示回転処理
             lcd.rect(67, 0, 80, 160, lcd.BLACK, lcd.BLACK)
