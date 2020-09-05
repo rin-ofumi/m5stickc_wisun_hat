@@ -28,6 +28,7 @@ Am_err                  = 1     # グローバル Ambientの初回通信が通�
 Disp_mode               = 0     # グローバル
 lcd_mute                = False # グローバル
 data_mute               = False # グローバル
+m5type                  = 0     # グローバル [0:M5StickC、1: M5StickCPlus]
 np_interval             = 5     # 瞬間電力値の要求サイクル（秒）※最短でも5秒以上が望ましい（基本は10秒とする）
 am_interval             = 30    # Ambientへデータを送るサイクル（秒））※Ambientは3000件/日までなので、丸1日分持たせるには30秒以上にする
 
@@ -53,8 +54,8 @@ axp = AXPCompat()
 
 
 # 時計表示スレッド関数
-def time_count ():
-    global Disp_mode
+def time_count():
+    global Disp_mode , m5type
     global Am_err
     
     while True:
@@ -64,15 +65,25 @@ def time_count ():
             fc = lcd.RED
 
         if Disp_mode == 1 : # 表示回転処理
-            lcd.rect(67, 0, 80, 160, lcd.BLACK, lcd.BLACK)
-            lcd.font(lcd.FONT_DefaultSmall, rotate = 90)
-            lcd.print('{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}'.format(*time.localtime()[:6]), 78, 40, fc)
+            if m5type == 0 :
+                lcd.rect(67, 0, 80, 160, lcd.BLACK, lcd.BLACK)
+                lcd.font(lcd.FONT_DefaultSmall, rotate = 90)
+                lcd.print('{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}'.format(*utime.localtime()[:6]), 78, 40, fc)
+            if m5type == 1 :
+                lcd.rect(113, 0, 135, 240, lcd.BLACK, lcd.BLACK)
+                lcd.font(lcd.FONT_DejaVu18, rotate = 90)
+                lcd.print('{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}'.format(*utime.localtime()[:6]), 131, 30, fc)
         else :
-            lcd.rect(0 , 0, 13, 160, lcd.BLACK, lcd.BLACK)
-            lcd.font(lcd.FONT_DefaultSmall, rotate = 270)
-            lcd.print('{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}'.format(*time.localtime()[:6]), 2, 125, fc)
+            if m5type == 0 :
+                lcd.rect(0 , 0, 13, 160, lcd.BLACK, lcd.BLACK)
+                lcd.font(lcd.FONT_DefaultSmall, rotate = 270)
+                lcd.print('{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}'.format(*utime.localtime()[:6]), 2, 125, fc)
+            if m5type == 1 :
+                lcd.rect(0 , 0, 20, 240, lcd.BLACK, lcd.BLACK)
+                lcd.font(lcd.FONT_DejaVu18, rotate = 270)
+                lcd.print('{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}'.format(*utime.localtime()[:6]), 4, 210, fc)
 		
-        utime.sleep(1)
+        utime.sleep(0.5)
 
 
 # 表示OFFボタン処理スレッド関数
@@ -104,21 +115,27 @@ def buttonB_wasPressed():
 
 # 表示モード切替時の枠描画処理関数
 def draw_lcd():
-    global Disp_mode
+    global Disp_mode , m5type
 
     lcd.clear()
 
     if Disp_mode == 1 :
-        lcd.line(66, 0, 66, 160, lcd.LIGHTGREY)
+        if m5type == 0 :
+            lcd.line(66, 0, 66, 160, lcd.LIGHTGREY)
+        if m5type == 1 :
+            lcd.line(112, 0, 112, 240, lcd.LIGHTGREY)
     else :
-        lcd.line(14, 0, 14, 160, lcd.LIGHTGREY)
+        if m5type == 0 :
+            lcd.line(14, 0, 14, 160, lcd.LIGHTGREY)
+        if m5type == 1 :
+            lcd.line(23, 0, 23, 240, lcd.LIGHTGREY)
     
     draw_w()
 
 
 # 瞬間電力値表示処理関数
 def draw_w():
-    global Disp_mode
+    global Disp_mode , m5type
     global lcd_mute
     global data_mute
     global AMPERE_LIMIT
@@ -137,17 +154,31 @@ def draw_w():
                 axp.setLDO2Vol(0)   # バックライト輝度調整（中くらい）
 	
     if Disp_mode == 1 : # 表示回転処理
-        lcd.rect(0, 0, 65, 160, lcd.BLACK, lcd.BLACK)
-        lcd.font(lcd.FONT_DejaVu18, rotate = 90) # 単位(W)の表示
-        lcd.print('W', 35, 120, fc)
-        lcd.font(lcd.FONT_DejaVu24, rotate = 90) # 瞬時電力値の表示
-        lcd.print(str(u.instant_power[0]), 40, 135 - ((len(str(u.instant_power[0])))* 24), fc)
+        if m5type == 0 :
+            lcd.rect(0, 0, 65, 160, lcd.BLACK, lcd.BLACK)
+            lcd.font(lcd.FONT_DejaVu18, rotate = 90) # 単位(W)の表示
+            lcd.print('W', 35, 120, fc)
+            lcd.font(lcd.FONT_DejaVu24, rotate = 90) # 瞬時電力値の表示
+            lcd.print(str(u.instant_power[0]), 40, 135 - (len(str(u.instant_power[0]))* 24), fc)
+        if m5type == 1 :
+            lcd.rect(0, 0, 111, 240, lcd.BLACK, lcd.BLACK)
+            lcd.font(lcd.FONT_DejaVu24, rotate = 90) # 単位(W)の表示
+            lcd.print('W', 63, 180, fc)
+            lcd.font(lcd.FONT_DejaVu40, rotate = 90) # 瞬時電力値の表示
+            lcd.print(str(u.instant_power[0]), 75, 220 - (len(str(u.instant_power[0]))* 40), fc)
     else :
-        lcd.rect(15 , 0, 80, 160, lcd.BLACK, lcd.BLACK)
-        lcd.font(lcd.FONT_DejaVu18, rotate = 270) # 単位(W)の表示
-        lcd.print('W', 45, 40, fc)
-        lcd.font(lcd.FONT_DejaVu24, rotate = 270) # 瞬時電力値の表示
-        lcd.print(str(u.instant_power[0]), 40, 25 + ((len(str(u.instant_power[0])))* 24), fc)
+        if m5type == 0 :
+            lcd.rect(15 , 0, 80, 160, lcd.BLACK, lcd.BLACK)
+            lcd.font(lcd.FONT_DejaVu18, rotate = 270) # 単位(W)の表示
+            lcd.print('W', 45, 40, fc)
+            lcd.font(lcd.FONT_DejaVu24, rotate = 270) # 瞬時電力値の表示
+            lcd.print(str(u.instant_power[0]), 40, 25 + (len(str(u.instant_power[0]))* 24), fc)
+        if m5type == 1 :
+            lcd.rect(24 , 0, 135, 240, lcd.BLACK, lcd.BLACK)
+            lcd.font(lcd.FONT_DejaVu24, rotate = 270) # 単位(W)の表示
+            lcd.print('W', 72, 60, fc)
+            lcd.font(lcd.FONT_DejaVu40, rotate = 270) # 瞬時電力値の表示
+            lcd.print(str(u.instant_power[0]), 60, 20 + (len(str(u.instant_power[0]))* 40), fc)
 	
 
 # wisun_set_m.txtの存在/中身チェック関数
@@ -267,6 +298,14 @@ def wisun_scan_filechk():
 
 # メインプログラムはここから（この上はプログラム内関数）
 
+# M5StickC/Plus機種判定
+if lcd.winsize() == (80,160) :
+    m5type = 0
+    print('>> M5Type = M5StickC')
+if lcd.winsize() == (136,241) :
+    m5type = 1
+    print('>> M5Type = M5StickCPlus')
+
 
 # 基本設定ファイル[wisun_set_m.txt]のチェック 無い場合は例外エラー吐いて終了する
 if not wisun_set_filechk() :
@@ -299,14 +338,18 @@ lcd.print('**', 0, 0, lcd.WHITE)
 
 
 # BP35A1 UART設定
-bp35a1 = machine.UART(1, tx=0, rx=36) # Wi-SUN HAT rev0.1用
-#bp35a1 = machine.UART(1, tx=0, rx=26)
+#bp35a1 = machine.UART(1, tx=0, rx=36) # Wi-SUN HAT rev0.1用
+bp35a1 = machine.UART(1, tx=0, rx=26) # Wi-SUN HAT rev0.2用
 bp35a1.init(115200, bits=8, parity=None, stop=1, timeout=2000)
 lcd.print('***', 0, 0, lcd.WHITE)
 print('>> UART init OK')
 
 # UARTの送受信バッファーの塵データをクリア
 utime.sleep(0.5)
+if bp35a1.any() != 0 :
+    dust = bp35a1.read()
+bp35a1.write('\r\n')
+utime.sleep(1)
 if bp35a1.any() != 0 :
     dust = bp35a1.read()
 bp35a1.write('\r\n')
@@ -606,7 +649,7 @@ print('heapmemory= ' + str(gc.mem_free()))
 
 
 # RTC設定
-utime.localtime(ntptime.settime())
+ntp = ntptime.client(host='jp.pool.ntp.org', timezone=9)
 print('>> RTC init OK')
 
 
@@ -617,7 +660,7 @@ print('>> Disp init OK')
 
 
 # 時刻表示スレッド起動
-_thread.start_new_thread(time_count , ())
+_thread.start_new_thread(time_count, ())
 print('>> Time Count thread ON')
 
 

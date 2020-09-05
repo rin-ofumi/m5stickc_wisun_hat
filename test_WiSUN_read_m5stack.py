@@ -17,12 +17,12 @@ now_power_time          = utime.time()
 
 
 # 時計表示スレッド関数
-def time_count ():
+def time_count():
     while True:
         lcd.rect(0 , 0, 320, 31, lcd.BLACK, lcd.BLACK)
         lcd.font(lcd.FONT_DejaVu24)
-        lcd.print('{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}'.format(*time.localtime()[:6]), lcd.CENTER, 6, lcd.WHITE)
-        utime.sleep(1)
+        lcd.print('{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}'.format(*utime.localtime()[:6]), lcd.CENTER, 6, lcd.WHITE)
+        utime.sleep(0.5)
 
 
 # 表示OFFボタン処理スレッド関数
@@ -120,7 +120,7 @@ print('>> WiFi init OK')
 
 
 # RTC設定
-utime.localtime(ntptime.settime())
+ntp = ntptime.client(host='jp.pool.ntp.org', timezone=9)
 print('>> RTC init OK')
 
 
@@ -132,7 +132,7 @@ print('>> Disp init OK')
 
 
 # 時刻表示スレッド起動
-_thread.start_new_thread(time_count , ())
+_thread.start_new_thread(time_count, ())
 print('>> Time Count thread ON')
 
 
@@ -142,6 +142,8 @@ print('>> Button Check thread ON')
 
 
 # ESP NOW設定
+wifiCfg.wlan_ap.active(True)
+#wifiCfg.wlan_sta.active(False)
 espnow.init()
 print('>> ESP NOW init')
 

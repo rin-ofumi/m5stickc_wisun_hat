@@ -12,7 +12,7 @@ MicroPython project / Wi-SUN HAT & M5StickC / Data storage uses Ambient
 * M5StickCとRHOM製Wi-SUN通信モジュール「BP35A1」を使って、家庭用スマートメーターをハックするプログラムです。
 * 「BP35A1」をM5StickCへ簡単に装着する為の「Wi-SUN HATキット」（[BOOTHで販売中](https://kitto-yakudatsu.booth.pm/items/1650727)）を使えば、半田付けもジャンパー線配線も無しで使えます。
 * AmbientというIoTデータ可視化サービスを使って、記録を残すことも可能です。（無料枠で使えます）
-* MicroPythonで記述しています。（ファームウェアは UIFlow-v1.4.1-beta を推奨）
+* MicroPythonで記述しています。（ファームウェアは UIFlow-v1.6.2 を推奨）
 
 <br>
 <br>
@@ -40,24 +40,7 @@ MicroPython project / Wi-SUN HAT & M5StickC / Data storage uses Ambient
 ## Ambientライブラリ「ambient.py」※オプション
 Ambientへのデータ送信（記録）を使う場合は、[こちら](https://github.com/AmbientDataInc/ambient-python-lib)のライブラリが必要です。<br>
 「ambient.py」を親機のM5StickCのルートに保存して下さい。<br>
-
-<br>
-
-## NTP時刻同期ライブラリ「ntptime.py」**※必須**
-NTP時刻同期機能は、[こちら](https://github.com/micropython/micropython/blob/master/ports/esp8266/modules/ntptime.py)のライブラリを使っています。<br>
-「ntptime.py」をダウンロードし、下記部分を修正して下さい。（日本時間へ設定を変える為）<br>
-
-```python
-NTP_DELTA = 3155673600
-```
-
-↓<br>
-
-```python
-NTP_DELTA = 3155673600 - (9*60*60)
-```
-
-修正したら「ntptime.py」を親機と子機のM5StickCのルートに保存して下さい。<br>
+※【2020.9.5】最新のAmbient.pyライブラリだと送信エラーになる症状が報告されています。エラーになる場合は、[Mar 17.2018版](https://github.com/AmbientDataInc/ambient-python-lib/tree/751afc4ad2ac5b6d37f236c5660e010a53cf670f)でお試し下さい。<br>
 
 <br>
 
@@ -67,7 +50,11 @@ NTP_DELTA = 3155673600 - (9*60*60)
 <br>
 
 ## 親機用プログラム本体「test_WiSUN_Ambient.py」**※必須**
-M5StickCのプログラム選択モード「APP.List」から起動させる場合は、親機のM5StickCの「Apps」配下に保存して下さい。<br>
+M5StickC・M5StickCPlus用です。（プログラム内で機種自動判別させてます）<br>
+※基板RevUpに伴い、UARTのピン割当てが変更されています。（[rev0.1] tx=0,rx=36 ⇒ [rev0.2] tx=0,rx=26）<br>
+Rev0.1（2020/8/30以前の販売分）の方は、341行目をアクティブにして、342行目をコメントアウトして下さい。<br>
+Rev0.2（2020/8/31以降の販売分）の方は、GitHubからダウンロードしたままで基本OKです。（341行目がコメントアウト、342行目がアクティブになっている筈）<br>
+M5StickCのプログラム選択モード「APP.List」から起動させる為、親機のM5StickCの「Apps」配下に保存して下さい。<br>
 
 <br>
 
@@ -85,8 +72,8 @@ M5StickCのプログラム選択モード「APP.List」から起動させる場�
 
 <br>
 
-## 子機用プログラム本体「test_WiSUN_read.py」/「test_WiSUN_read_m5stack.py」**※オプション**
-「test_WiSUN_read.py」がM5StickC用で、「test_WiSUN_read_m5stack.py」がM5Stack用です。<br>
+## 子機用プログラム本体「test_WiSUN_read_m5stickc.py」/「test_WiSUN_read_m5stack.py」**※オプション**
+「test_WiSUN_read_m5stickc.py」がM5StickC・M5StickCPlus用（プログラム内で機種自動判別させてます）で、「test_WiSUN_read_m5stack.py」がM5Stack用です。<br>
 プログラム選択モード「APP.List」から起動させる場合は、「Apps」配下に保存して下さい。<br>
 
 <br>
@@ -115,7 +102,7 @@ M5StickCのプログラム選択モード「APP.List」から起動させる場�
 
 <br>
 
-## M5StickC版のボタン操作
+## M5StickC/Plus版のボタン操作
 
 - Aボタン（M5ロゴの有るボタン）を押すと画面消灯します。もう一度押すと画面点灯します。（電力が警告値を超えてる場合は、強制点灯されます）
 - Bボタン（電源ボタンじゃない方の側面ボタン）を押すと表示が180度回転しますので、設置向きに合わせてお選び下さい。
@@ -138,6 +125,17 @@ M5StickCのプログラム選択モード「APP.List」から起動させる場�
 <br>
 
 # <アップデート履歴>
+
+## 【2020.09.05】 [test_WiSUN_Ambient.py][test_WiSUN_read_m5stickc.py][test_WiSUN_read_m5stack.py] Update!
+
+* 基板Rev0.2対応。（Rev0.2からUARTピン割当てが変更されました）
+* UIFlow-v1.6.2 ファームへの対応。
+* UIFlowファーム内にてntptimeライブラリが含まれる様になったので、ntptime.pyライブラリの転送が不要になりました
+* M5StickCPlus対応（M5StickC版と同じソースコードで動作します）併せて[test_WiSUN_read.py]から[test_WiSUN_read_m5stickc.py]に改名。
+* その他バグFix。
+* ファイル毎の改行コード混在の是正。（LFに統一しました）
+
+<br>
 
 ## 【2019.12.13】 [test_WiSUN_Ambient.py] Update!
 
