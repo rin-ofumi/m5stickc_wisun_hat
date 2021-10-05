@@ -12,7 +12,7 @@ MicroPython project / Wi-SUN HAT & M5StickC / Data storage uses Ambient
 * M5StickCとRHOM製Wi-SUN通信モジュール「BP35A1」を使って、家庭用スマートメーターをハックするプログラムです。
 * 「BP35A1」をM5StickCへ簡単に装着する為の「Wi-SUN HATキット」（[BOOTHで販売中](https://kitto-yakudatsu.booth.pm/items/1650727)）を使えば、半田付けもジャンパー線配線も無しで使えます。
 * AmbientというIoTデータ可視化サービスを使って、記録を残すことも可能です。（無料枠で使えます）
-* MicroPythonで記述しています。（ファームウェアは UIFlow-v1.6.2 を推奨）
+* MicroPythonで記述しています。（ファームウェアは UIFlow-v1.8.5 を使用）
 
 <br>
 <br>
@@ -125,6 +125,12 @@ M5StickCのプログラム選択モード「APP.List」から起動させる為�
 <br>
 
 # <アップデート履歴>
+
+## 【2021.10.05】 [test_WiSUN_Ambient.py] Update!
+
+* スマートメーターのチャンネル変更等で受信できなくなった場合や通信タイムアウトの発生に応じ、M5StickCをresetする処理を追加。
+
+<br>
 
 ## 【2020.09.05】 [test_WiSUN_Ambient.py][test_WiSUN_read_m5stickc.py][test_WiSUN_read_m5stack.py] Update!
 

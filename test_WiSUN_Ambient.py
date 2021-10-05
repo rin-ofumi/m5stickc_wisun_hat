@@ -585,7 +585,9 @@ while True :
                             macadr = ''
                             u.power_coefficient = 0
                             u.power_unit = 0.0
-                    break
+                            print(">> Erase Wi-SUN_SCAN.txt! & Reboot!!")
+                            utime.sleep(1)
+                            machine.reset() #ファイル削除の後リブートする
                 elif ure.match("EVENT 25" , line.strip()) :
                     print(">> PANA authentication OK!")
                     bConnected = True
@@ -734,6 +736,9 @@ while True:
         if (utime.time() - u.instant_power[1]) >= TIMEOUT : # スマートメーターから瞬時電力計測値の応答が一定時間無い場合は電力値表示のみオフ
             data_mute = True
             draw_w()
+        if (utime.time() - u.instant_power[1]) >= (TIMEOUT * 4) : # スマートメーターから瞬時電力計測値の応答が一定時間無い場合（TIMEOUTの4倍）はスマートメーターとの通信異常としてリブートする
+            print('>> Communication failure?? Reboot!!')
+            machine.reset()
 
     utime.sleep(0.1)
     gc.collect()
