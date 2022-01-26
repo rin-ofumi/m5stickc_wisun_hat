@@ -10,7 +10,7 @@ MicroPython project / Wi-SUN HAT & M5StickC / Data storage uses Ambient
 <br>
 
 * M5StickCとRHOM製Wi-SUN通信モジュール「BP35A1」を使って、家庭用スマートメーターをハックするプログラムです。
-* 「BP35A1」をM5StickCへ簡単に装着する為の「Wi-SUN HATキット」（[BOOTHで販売中](https://kitto-yakudatsu.booth.pm/items/1650727)）を使えば、半田付けもジャンパー線配線も無しで使えます。
+* 「BP35A1」をM5StickCへ簡単に装着する為の「Wi-SUN HATキット」を使えば、半田付けもジャンパー線配線も無しで使えます。（「Wi-SUN HATキット」は[BOOTH](https://kitto-yakudatsu.booth.pm/items/1650727)と[スイッチサイエンス](https://www.switch-science.com/catalog/7612/)で販売中）
 * AmbientというIoTデータ可視化サービスを使って、記録を残すことも可能です。（無料枠で使えます）
 * MicroPythonで記述しています。（ファームウェアは UIFlow-v1.8.5 を使用）
 
@@ -40,7 +40,6 @@ MicroPython project / Wi-SUN HAT & M5StickC / Data storage uses Ambient
 ## Ambientライブラリ「ambient.py」※オプション
 Ambientへのデータ送信（記録）を使う場合は、[こちら](https://github.com/AmbientDataInc/ambient-python-lib)のライブラリが必要です。<br>
 「ambient.py」を親機のM5StickCのルートに保存して下さい。<br>
-※【2020.9.5】最新のAmbient.pyライブラリだと送信エラーになる症状が報告されています。エラーになる場合は、[Mar 17.2018版](https://github.com/AmbientDataInc/ambient-python-lib/tree/751afc4ad2ac5b6d37f236c5660e010a53cf670f)でお試し下さい。<br>
 
 <br>
 
@@ -72,19 +71,19 @@ M5StickCのプログラム選択モード「APP.List」から起動させる為�
 
 <br>
 
-## 子機用プログラム本体「test_WiSUN_read_m5stickc.py」/「test_WiSUN_read_m5stack.py」**※オプション**
-「test_WiSUN_read_m5stickc.py」がM5StickC・M5StickCPlus用（プログラム内で機種自動判別させてます）で、「test_WiSUN_read_m5stack.py」がM5Stack用です。<br>
+## モニター子機用プログラム本体「test_WiSUN_read_m5stickc.py」/「test_WiSUN_view_m5stack.py」/「test_WiSUN_view_m5stc2.py」**※オプション**
+「test_WiSUN_read_m5stickc.py」がM5StickC・M5StickCPlus用（プログラム内で機種自動判別させてます）で、「test_WiSUN_view_m5stack.py」がM5Stack用。「test_WiSUN_view_m5stc2.py」がM5Stack Core2用です。<br>
 プログラム選択モード「APP.List」から起動させる場合は、「Apps」配下に保存して下さい。<br>
 
 <br>
 
-## 子機用の設定ファイル「wisun_set_r.txt」**※オプション**
+## モニター子機用の設定ファイル「wisun_set_r.txt」**※オプション**
 
 * 電力契約のアンペアブレーカー値を「AMPERE_LIMIT:」以降に追記して下さい。
 * 電力使用過多警告の係数を「AMPERE_RED:」以降に追記して下さい。
 
 ※全てにおいて、空白文字、"などは含まない様にして下さい<br>
-修正後、子機のM5StickC（あるいはM5Stack）のルートに保存して下さい。<br>
+修正後、モニター子機のM5StickC（あるいはM5Stack）のルートに保存して下さい。<br>
 
 <br>
 
@@ -102,7 +101,7 @@ M5StickCのプログラム選択モード「APP.List」から起動させる為�
 
 <br>
 
-## M5StickC/Plus版のボタン操作
+## M5StickC/Plus版（親機）のボタン操作
 
 - Aボタン（M5ロゴの有るボタン）を押すと画面消灯します。もう一度押すと画面点灯します。（電力が警告値を超えてる場合は、強制点灯されます）
 - Bボタン（電源ボタンじゃない方の側面ボタン）を押すと表示が180度回転しますので、設置向きに合わせてお選び下さい。
@@ -113,9 +112,19 @@ M5StickCのプログラム選択モード「APP.List」から起動させる為�
 
 <br>
 
-## M5Stack版のボタン操作
+## M5StickC/Plus版（モニター子機）のボタン操作
+
+- Aボタン（M5ロゴの有るボタン）を押すと画面消灯します。もう一度押すと画面点灯します。（電力が警告値を超えてる場合は、強制点灯されます）
+- Bボタン（電源ボタンじゃない方の側面ボタン）を押すと表示が180度回転しますので、設置向きに合わせてお選び下さい。
+- M5StickC Plusの場合は、AボタンをダブルクリックするとBEEP音 ON/OFFをトグル選択します。（BEEP ONだと電力が警告値を超えた場合に警報音が鳴ります）
+
+<br>
+
+## M5Stack版（モニター子機）とM5Stack Core2版（モニター子機）のボタン操作
 
 - Aボタン（3ボタンの左のボタンです）を押すと画面消灯します。もう一度押すと画面点灯します。（電力が警告値を超えてる場合は、強制点灯されます）
+- Bボタン（3ボタンの真ん中のボタンです）を押すと「瞬間電力値表示モード」と「30分毎積算電力量棒グラフ表示モード」の切り替えができます。（**30分毎積算電力量棒グラフは、親機からのESPNOW受信漏れが起こった場合は表示欠けになります。※再送要求処理はしておりません**）
+- Cボタン（3ボタンの右のボタンです）を押すとBEEP ON/OFFをトグル選択します。（BEEP ONだと電力が警告値を超えた場合に警報音が鳴ります）
 
 <br>
 
@@ -125,6 +134,16 @@ M5StickCのプログラム選択モード「APP.List」から起動させる為�
 <br>
 
 # <アップデート履歴>
+
+## 【2022.01.26】 [test_WiSUN_view_m5c2.py][test_WiSUN_view_m5stack.py][test_WiSUN_read_m5stickc.py] Update!
+
+* モニター子機用プログラムの刷新。（3種ともUIFlow-v1.9.0で検証）
+* M5Stack Core2モニター子機用プログラムの追加と併せて、M5Stackモニター子機用プログラムを[test_WiSUN_read_m5stack.py]から[test_WiSUN_view_m5stack.py]に改名。
+* M5StickCPlusモニター子機用とM5StickCモニター子機用は[test_WiSUN_read_m5stickc.py]です。（文字サイズ拡大、Plusのみ警報BEEP対応）
+* M5Stackモニター子機用は[test_WiSUN_view_m5stack.py]です。（警報BEEP対応、30分毎積算電力量棒グラフ表示モード追加）
+* M5Stack Core2モニター子機用は[test_WiSUN_view_m5stc2.py]です。（警報BEEP対応、30分毎積算電力量棒グラフ表示モード追加）
+
+<br>
 
 ## 【2021.10.05】 [test_WiSUN_Ambient.py] Update!
 
