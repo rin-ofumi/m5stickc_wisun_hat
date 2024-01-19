@@ -1,5 +1,5 @@
 from m5stack import *
-from m5ui import *
+from m5stack_ui import *
 import machine
 import gc
 import utime
@@ -45,18 +45,6 @@ TotalPower              = [0] * 97
 day_buf                 = ''
 
 
-# BEEP音鳴らしスレッド関数
-def beep_sound():
-    while True:
-        if data_mute or (now_power == 0) : # タイムアウトで表示ミュートされてるか、初期値のままならpass
-            pass
-        else :
-            if (now_power >= (AMPERE_LIMIT * AMPERE_RED * 100)) and (beep == True) :  # 警告閾値超えでBEEP ONなら
-                speaker.tone(freq=220, duration=200)
-                utime.sleep(2)
-        utime.sleep(0.1)
-
-
 # 表示OFFボタン処理スレッド関数
 def buttonA_wasPressed():
     global lcd_mute
@@ -67,9 +55,9 @@ def buttonA_wasPressed():
         lcd_mute = True
 
     if lcd_mute == True :
-        lcd.setBrightness(0) #バックライト輝度調整（OFF）
+        screen.set_screen_brightness(0) #バックライト輝度調整（OFF）
     else :
-        lcd.setBrightness(30) #バックライト輝度調整（中くらい）
+        screen.set_screen_brightness(50) #バックライト輝度調整（中くらい）
 
     utime.sleep(0.1)
 
@@ -105,13 +93,11 @@ def buttonC_wasPressed():
         beep = True
 
     if beep == True :   # BEEP ON
-        lcd.roundrect(230, 213, 58, 20, 10, 0x66e6ff, 0x2acf00)
-        lcd.font(lcd.FONT_Default)
-        lcd.text(242, 217, "BEEP", 0xffffff)
+        beep_button.set_bg_color(0x2acf00)
+        beep_button.set_btn_text_color(0xffffff)
     else :              # BEEP OFF
-        lcd.roundrect(230, 213, 58, 20, 10, 0x66e6ff, 0x000000)
-        lcd.font(lcd.FONT_Default)
-        lcd.text(242, 217, "BEEP", 0x7b7b7b)
+        beep_button.set_bg_color(0x000000)
+        beep_button.set_btn_text_color(0x7b7b7b)
 
     utime.sleep(0.1)
 
@@ -124,37 +110,43 @@ def draw_w():
         if now_power >= (AMPERE_LIMIT * AMPERE_RED * 100) :  # 警告閾値超え時は文字が赤くなる
             fc = 0xff0000   # 赤色
             if lcd_mute == True :   # 閾値超え時はLCD ON
-                lcd.setBrightness(30) #バックライト輝度調整（中くらい）
+                screen.set_screen_brightness(50) #バックライト輝度調整（中くらい）
+            if beep == True :       # 閾値越え時、且つ beep == True なら音を鳴らす
+                speaker.playTone(220, 1/2)
         else :
             fc = 0xffffff   # 白色
             if lcd_mute == True :
-                lcd.setBrightness(0) #バックライト輝度調整（OFF）
+                screen.set_screen_brightness(0) #バックライト輝度調整（OFF）
 
     if disp_mode == True :  # 瞬間電力値最大化表示モード時
         lcd.rect(0 , 0, 320, 205, 0x000000, 0x000000)
         # 瞬間電力値表示
-        lcd.font(lcd.FONT_7seg, dist=32, width=5)
-        lcd.text(lcd.RIGHT, 60, str(now_power) + ' ', fc)
+        label_P_B.set_hidden(False)
+        label_P_B.set_text_color(fc)
+        label_P_B.set_text(str(now_power))
         # W表示
-        lcd.font(lcd.FONT_DejaVu40)
-        lcd.text(280, 130, 'W', fc)
+        label_W_B.set_hidden(False)
+        label_W_B.set_text_color(fc)
+        label_W_B.set_text('W')
     else :                  # 積算電力棒グラフ表示モード時
         lcd.rect(0 , 0, 320, 63, 0x000000, 0x000000)
         # 瞬間電力値表示
-        lcd.font(lcd.FONT_DejaVu56)
-        lcd.text(88, 5, str(now_power), fc)
+        label_P_A.set_hidden(False)
+        label_P_A.set_text_color(fc)
+        label_P_A.set_text(str(now_power))
         # W表示
-        lcd.font(lcd.FONT_DejaVu40)
-        lcd.text(238, 18, 'W', fc)
+        label_W_A.set_hidden(False)
+        label_W_A.set_text_color(fc)
+        label_W_A.set_text('W')
 
 
-def draw_graph_tp() : # 積算電力量棒グラフ描画関数
+def draw_graph_tp () : # 積算電力量棒グラフ描画関数
     graph_scale = 3.0       # グラフ表示倍率（ややサチる値にしてる）
     graph_red = 0.7         # グラフ赤色閾値（0.0～1.0）
     graph_orange = 0.3      # グラフ橙色閾値（0.0～1.0）
     graph_color = 0x000000  # 初期値はとりあえず黒色
     width = 5
-    
+
     lcd.line(0, 64, 320, 64, 0xaeaeae)
     lcd.line(0, 186, 320, 186, 0xaeaeae)
     lcd.line(15 + (6 * 0), 186, 15 + (6 * 0), 190, 0xaeaeae)
@@ -163,20 +155,19 @@ def draw_graph_tp() : # 積算電力量棒グラフ描画関数
     lcd.line(15 + (6 * 36), 186, 15 + (6 * 36), 190, 0xaeaeae)
     lcd.line(15 + (6 * 48), 186, 15 + (6 * 48), 190, 0xaeaeae)
 
-    lcd.font(lcd.FONT_DefaultSmall)
-    lcd.text(0, 188, '00:00', 0xffffff)
-    lcd.text(72, 188, '06:00', 0xffffff)
-    lcd.text(144, 188, '12:00', 0xffffff)
-    lcd.text(216, 188, '18:00', 0xffffff)
-    lcd.text(288, 188, '24:00', 0xffffff)
-
     lcd.rect(0, 65, 320, 120, 0x000000, 0x000000)
     lcd.line(15 + (6 * 0), 65, 15 + (6 * 0), 186, 0x303030)
     lcd.line(15 + (6 * 12), 65, 15 + (6 * 12), 186, 0x303030)
     lcd.line(15 + (6 * 24), 65, 15 + (6 * 24), 186, 0x303030)
     lcd.line(15 + (6 * 36), 65, 15 + (6 * 36), 186, 0x303030)
     lcd.line(15 + (6 * 48), 65, 15 + (6 * 48), 186, 0x303030)
-    
+
+    label_00.set_hidden(False)
+    label_06.set_hidden(False)
+    label_12.set_hidden(False)
+    label_18.set_hidden(False)
+    label_24.set_hidden(False)
+
     for n in range(1, 97, 1) :
         if ( TotalPower[n] == 0 ) or ( TotalPower[n - 1] == 0 ):
             h_power = 0
@@ -270,26 +261,44 @@ wisun_set_filechk()
 
 
 # 画面初期化
-setScreenColor(0x000000)
-lcd.setBrightness(30) #バックライト輝度調整（中くらい）
-lcd.clear()
+screen = M5Screen()
+screen.clean_screen()
+screen.set_screen_bg_color(0x000000)
+screen.set_screen_brightness(50) #バックライト輝度調整（中くらい）
 
 
-# BEEPアイコン描画
+# 基本要素の描画
+label_P_A = M5Label('', x=97, y=5, color=0xffffff, font=FONT_MONT_38)
+label_W_A = M5Label('w', x=236, y=25, color=0xffffff, font=FONT_MONT_26)
+label_P_A.set_hidden(True)
+label_W_A.set_hidden(True)
+
+label_P_B = M5Label('', x=99, y=92, color=0xffffff, font=FONT_MONT_38)
+label_W_B = M5Label('w', x=228, y=110, color=0xffffff, font=FONT_MONT_26)
+label_P_B.set_hidden(True)
+label_W_B.set_hidden(True)
+
+label_D = M5Label('', x=2, y=208, color=0xffffff, font=FONT_MONT_18)
+
+beep_button = M5Btn(text='BEEP', x=230, y=210, w=70, h=25, bg_c=0x000000, text_c=0x7b7b7b, font=FONT_MONT_14, parent=None)
 if beep == True :   # BEEP ON
-    lcd.roundrect(230, 213, 58, 20, 10, 0x66e6ff, 0x2acf00)
-    lcd.font(lcd.FONT_Default)
-    lcd.text(242, 217, "BEEP", 0xffffff)
+    beep_button.set_bg_color(0x2acf00)
+    beep_button.set_btn_text_color(0xffffff)
 else :              # BEEP OFF
-    lcd.roundrect(230, 213, 58, 20, 10, 0x66e6ff, 0x000000)
-    lcd.font(lcd.FONT_Default)
-    lcd.text(242, 217, "BEEP", 0x7b7b7b)
+    beep_button.set_bg_color(0x000000)
+    beep_button.set_btn_text_color(0x7b7b7b)
+
+label_00 = M5Label('00:00', x=0, y=188, color=0xffffff, font=FONT_MONT_10)
+label_06 = M5Label('06:00', x=72, y=188, color=0xffffff, font=FONT_MONT_10)
+label_12 = M5Label('12:00', x=144, y=188, color=0xffffff, font=FONT_MONT_10)
+label_18 = M5Label('18:00', x=216, y=188, color=0xffffff, font=FONT_MONT_10)
+label_24 = M5Label('24:00', x=286, y=188, color=0xffffff, font=FONT_MONT_10)
+label_00.set_hidden(True)
+label_06.set_hidden(True)
+label_12.set_hidden(True)
+label_18.set_hidden(True)
+label_24.set_hidden(True)
 print('>> Disp init OK')
-
-
-# BEEP音鳴らしスレッド起動
-_thread.start_new_thread(beep_sound, ())
-print('>> BEEP Sound thread ON')
 
 
 # ボタン検出スレッド起動
@@ -366,9 +375,7 @@ while True:
 #                print(str(i) + '=' + str(TotalPower[i]))
 
             # 積算電力量の最終受信日付表示（デバッグ用）
-            lcd.rect(0, 205, 229, 240, 0x000000, 0x000000)
-            lcd.font(lcd.FONT_Ubuntu)
-            lcd.text(2, 217, tpd_date + ' ' + tpd_time, 0xffffff)
+            label_D.set_text(tpd_date + ' ' + tpd_time)
 
             # 棒グラフ描画
             if disp_mode != True :  # 積算電力量棒グラフ表示モードなら

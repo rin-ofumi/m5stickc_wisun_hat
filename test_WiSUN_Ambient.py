@@ -10,6 +10,8 @@ import ntptime
 import wisun_udp
 
 
+#### 変数・関数初期値定義 ####
+
 # 固定値
 GET_COEFFICIENT         = b'\x10\x81\x00\x01\x05\xFF\x01\x02\x88\x01\x62\x01\xD3\x00'           #D3     *積算電力量係数の要求
 GET_TOTAL_POWER_UNIT    = b'\x10\x81\x00\x01\x05\xFF\x01\x02\x88\x01\x62\x01\xE1\x00'           #E1     *積算電力量単位の要求
@@ -28,7 +30,8 @@ Am_err                  = 1     # グローバル Ambientの初回通信が通�
 Disp_mode               = 0     # グローバル
 lcd_mute                = False # グローバル
 data_mute               = False # グローバル
-m5type                  = 0     # グローバル [0:M5StickC、1: M5StickCPlus]
+m5type                  = 0     # 画面サイズ種別 [0:M5StickC、1: M5StickCPlus/2]
+bkl_ON                  = 40    # 画面ON時のバックライト輝度 [0 ～ 100]
 np_interval             = 5     # 瞬間電力値の要求サイクル（秒）※最短でも5秒以上が望ましい（基本は10秒とする）
 am_interval             = 30    # Ambientへデータを送るサイクル（秒））※Ambientは3000件/日までなので、丸1日分持たせるには30秒以上にする
 
@@ -42,15 +45,15 @@ AMPERE_RED              = 0.7   # 契約ブレーカー値に対し、どれく�
 AMPERE_LIMIT            = 30    # 契約ブレーカー値のデフォルト値
 
 
-# @cinimlさんのファーム差分吸収ロジック
-class AXPCompat(object):
-    def __init__(self):
-        if( hasattr(axp, 'setLDO2Vol') ):
-            self.setLDO2Vol = axp.setLDO2Vol
-        else:
-            self.setLDO2Vol = axp.setLDO2Volt
+# Plus/2でバックライト制御が違うので対応（PlusはAXPでバックライト制御、Plus2はAXP無し）
+def bkl_level( a: int ):
+    if (a > 100):   # 輝度指定は0～100まで
+        a = 100
 
-axp = AXPCompat()
+    if 'axp' in globals():   # M5StickC無印、またはM5StickC Plusの場合
+        axp.setLcdBrightness(a)
+    else :                   # M5StickC Plus2の場合
+        M5pwr.brightness(a)
 
 
 # 時計表示スレッド関数
@@ -96,9 +99,9 @@ def buttonA_wasPressed():
         lcd_mute = True
 
     if lcd_mute == True :
-        axp.setLDO2Vol(0)   #バックライト輝度調整（OFF）
+        bkl_level(0)        # バックライト輝度調整（OFF）
     else :
-        axp.setLDO2Vol(2.7) #バックライト輝度調整（中くらい）
+        bkl_level(bkl_ON)    # バックライト輝度調整（ON）
 
 
 # 表示切替ボタン処理スレッド関数
@@ -147,11 +150,11 @@ def draw_w():
         if u.instant_power[0] >= (AMPERE_LIMIT * AMPERE_RED * 100) :  # 警告閾値超え時は文字が赤くなる
             fc = lcd.RED
             if lcd_mute == True :   # 閾値超え時はLCD ON
-                axp.setLDO2Vol(2.7) # バックライト輝度調整（中くらい）
+                bkl_level(bkl_ON)   # バックライト輝度調整（ON）
         else :
             fc = lcd.WHITE
             if lcd_mute == True :
-                axp.setLDO2Vol(0)   # バックライト輝度調整（中くらい）
+                bkl_level(0)        # バックライト輝度調整（OFF）
 	
     if Disp_mode == 1 : # 表示回転処理
         if m5type == 0 :
@@ -296,7 +299,7 @@ def wisun_scan_filechk():
     return scanfile_flg
 
 
-# メインプログラムはここから（この上はプログラム内関数）
+#### メインプログラムはここから（この上はプログラム内関数）####
 
 # M5StickC/Plus機種判定
 if lcd.winsize() == (80,160) :
@@ -642,7 +645,8 @@ lcd.print('***** ***** *', 0, 0, lcd.WHITE)
 # ESP NOW設定
 if ESP_NOW_F :
     import espnow
-    espnow.init()
+#    wifiCfg.wlan_ap.active(True)
+    espnow.init(0)  # UIFlow Ver1.10.2以降への対応
     print('>> ESP NOW init')
 lcd.print('***** ***** **', 0, 0, lcd.WHITE)
 
@@ -656,7 +660,7 @@ print('>> RTC init OK')
 
 
 # 画面初期化
-axp.setLDO2Vol(2.7) #バックライト輝度調整（中くらい）
+bkl_level(bkl_ON) #バックライト輝度調整（ON）
 draw_lcd()
 print('>> Disp init OK')
 

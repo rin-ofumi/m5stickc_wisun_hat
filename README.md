@@ -12,7 +12,7 @@ MicroPython project / Wi-SUN HAT & M5StickC / Data storage uses Ambient
 * M5StickCとRHOM製Wi-SUN通信モジュール「BP35A1」を使って、家庭用スマートメーターをハックするプログラムです。
 * 「BP35A1」をM5StickCへ簡単に装着する為の「Wi-SUN HATキット」を使えば、半田付けもジャンパー線配線も無しで使えます。（「Wi-SUN HATキット」は[BOOTH](https://kitto-yakudatsu.booth.pm/items/1650727)と[スイッチサイエンス](https://www.switch-science.com/catalog/7612/)で販売中）
 * AmbientというIoTデータ可視化サービスを使って、記録を残すことも可能です。（無料枠で使えます）
-* MicroPythonで記述しています。（ファームウェアは UIFlow-v1.8.5 を使用）
+* MicroPythonで記述しています。
 
 <br>
 <br>
@@ -35,6 +35,20 @@ MicroPython project / Wi-SUN HAT & M5StickC / Data storage uses Ambient
 
 <br>
 
+# <当サンプルプログラムの対応機種>
+
+## 親機用：「M5StickC」「M5StickC Plus」「M5StickC Plus2」
+M5StickC・M5StickC Plus・M5StickC Plus2は3種とも UIFlow-v1.13.1（2024/1/19時点の最新Ver）で検証。<br>
+
+<br>
+
+## モニター子機用：「M5StickC」「M5StickC Plus」「M5StickC Plus2」「M5Stack」「M5Stack Core2」
+M5StickC・M5StickC Plus・M5StickC Plus2は3種とも UIFlow-v1.13.1（2024/1/19時点の最新Ver）で検証。<br>
+M5Stackは UIFlow-v1.13.1（2024/1/19時点の最新Ver）で検証。<br>
+M5Stack Core2は UIFlow-v1.13.0（2024/1/19時点の最新Ver）で検証。<br>
+
+<br>
+
 # <実行に必要なファイル>
 
 ## Ambientライブラリ「ambient.py」※オプション
@@ -49,7 +63,7 @@ Ambientへのデータ送信（記録）を使う場合は、[こちら](https:/
 <br>
 
 ## 親機用プログラム本体「test_WiSUN_Ambient.py」**※必須**
-M5StickC・M5StickCPlus用です。（プログラム内で機種自動判別させてます）<br>
+M5StickC・M5StickC Plus・M5StickC Plus2用です。（プログラム内で機種自動判別させてます）<br>
 ※基板RevUpに伴い、UARTのピン割当てが変更されています。（[rev0.1] tx=0,rx=36 ⇒ [rev0.2] tx=0,rx=26）<br>
 Rev0.1（2020/8/30以前の販売分）の方は、341行目をアクティブにして、342行目をコメントアウトして下さい。<br>
 Rev0.2（2020/8/31以降の販売分）の方は、GitHubからダウンロードしたままで基本OKです。（341行目がコメントアウト、342行目がアクティブになっている筈）<br>
@@ -71,8 +85,8 @@ M5StickCのプログラム選択モード「APP.List」から起動させる為�
 
 <br>
 
-## モニター子機用プログラム本体「test_WiSUN_read_m5stickc.py」/「test_WiSUN_view_m5stack.py」/「test_WiSUN_view_m5stc2.py」**※オプション**
-「test_WiSUN_read_m5stickc.py」がM5StickC・M5StickCPlus用（プログラム内で機種自動判別させてます）で、「test_WiSUN_view_m5stack.py」がM5Stack用。「test_WiSUN_view_m5stc2.py」がM5Stack Core2用です。<br>
+## モニター子機用プログラム本体「test_WiSUN_view_m5stickc.py」/「test_WiSUN_view_m5stack.py」/「test_WiSUN_view_m5core2.py」**※オプション**
+「test_WiSUN_view_m5stickc.py」がM5StickC・M5StickC Plus・M5StickC Plus2用（プログラム内で機種自動判別させてます）で、「test_WiSUN_view_m5stack.py」がM5Stack用。「test_WiSUN_view_m5core2.py」がM5Stack Core2用です。<br>
 プログラム選択モード「APP.List」から起動させる場合は、「Apps」配下に保存して下さい。<br>
 
 <br>
@@ -101,7 +115,7 @@ M5StickCのプログラム選択モード「APP.List」から起動させる為�
 
 <br>
 
-## M5StickC/Plus版（親機）のボタン操作
+## M5StickC/Plus/Plus2版（親機）のボタン操作
 
 - Aボタン（M5ロゴの有るボタン）を押すと画面消灯します。もう一度押すと画面点灯します。（電力が警告値を超えてる場合は、強制点灯されます）
 - Bボタン（電源ボタンじゃない方の側面ボタン）を押すと表示が180度回転しますので、設置向きに合わせてお選び下さい。
@@ -112,7 +126,7 @@ M5StickCのプログラム選択モード「APP.List」から起動させる為�
 
 <br>
 
-## M5StickC/Plus版（モニター子機）のボタン操作
+## M5StickC/Plus/Plus2版（モニター子機）のボタン操作
 
 - Aボタン（M5ロゴの有るボタン）を押すと画面消灯します。もう一度押すと画面点灯します。（電力が警告値を超えてる場合は、強制点灯されます）
 - Bボタン（電源ボタンじゃない方の側面ボタン）を押すと表示が180度回転しますので、設置向きに合わせてお選び下さい。
@@ -134,6 +148,16 @@ M5StickCのプログラム選択モード「APP.List」から起動させる為�
 <br>
 
 # <アップデート履歴>
+
+## 【2024.01.19】 [test_WiSUN_Ambient.py][test_WiSUN_view_m5stickc.py][test_WiSUN_view_m5stack.py][test_WiSUN_view_m5core2.py] Update!
+
+* 親機用プログラムの更新。（最近のUIFlowファームでもESPNOWが機能する様に修正。最新モデル「M5StickC Plus2」へ対応。）
+* モニター子機用プログラムの更新。（同上）
+* M5StickC・M5StickC Plus・M5StickC Plus2用モニター子機プログラムを[test_WiSUN_view_m5stickc.py]に改名。
+* M5Stack Core2モニター子機用プログラムを[test_WiSUN_view_m5core2.py]に改名。
+* (モニター子機系のプログラム名は view に統一しました）
+
+<br>
 
 ## 【2022.01.26】 [test_WiSUN_view_m5c2.py][test_WiSUN_view_m5stack.py][test_WiSUN_read_m5stickc.py] Update!
 
