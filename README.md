@@ -9,8 +9,9 @@ MicroPython project / Wi-SUN HAT & M5StickC / Data storage uses Ambient
 
 <br>
 
-* M5StickCとRHOM製Wi-SUN通信モジュール「BP35A1」を使って、家庭用スマートメーターをハックするプログラムです。
-* 「BP35A1」をM5StickCへ簡単に装着する為の「Wi-SUN HATキット」を使えば、半田付けもジャンパー線配線も無しで使えます。（「Wi-SUN HATキット」は[BOOTH](https://kitto-yakudatsu.booth.pm/items/1650727)と[スイッチサイエンス](https://www.switch-science.com/catalog/7612/)で販売中）
+* M5StickCとRHOM製Wi-SUN通信モジュール「BP35A1」または「BP35C1-J11-T01」を使って、家庭用スマートメーターをハックするプログラムです。
+* 「BP35A1」または「BP35C1-J11-T01」をM5StickCへ簡単に装着する為の「Wi-SUN HATキット」を使えば、半田付けもジャンパー線配線も無しで使えます。（「Wi-SUN HATキット」は[BOOTH](https://kitto-yakudatsu.booth.pm/items/1650727)と[スイッチサイエンス](https://www.switch-science.com/catalog/7612/)で販売中）
+※「BP35A1」用が「Wi-SUN HAT（無印）」で「BP35C1-J11-T01」用が「Wi-SUN HAT-C1」となります。（互換性無いので、注意してご購入下さい！）
 * AmbientというIoTデータ可視化サービスを使って、記録を残すことも可能です。（無料枠で使えます）
 * MicroPythonで記述しています。
 
@@ -27,18 +28,18 @@ MicroPython project / Wi-SUN HAT & M5StickC / Data storage uses Ambient
 
 洗面所のドライヤー近くや、キッチンなどの大電力家電を使う場所にモニター子機を設置することで、うっかりブレーカーを落とす危険を排除します。
 
-![Ambient_ENV_3](https://kitto-yakudatsu.com/wp/wp-content/uploads/2019/10/P1180703.jpg)
+![Ambient_ENV_3](https://kitto-yakudatsu.com/wp/wp-content/uploads/2019/10/%E6%B4%97%E9%9D%A2%E6%89%80_1-scaled.jpg)
 
-![Ambient_ENV_4](https://kitto-yakudatsu.com/wp/wp-content/uploads/2019/10/P1180702.jpg)
+![Ambient_ENV_4](https://kitto-yakudatsu.com/wp/wp-content/uploads/2019/10/%E5%AD%90%E6%A9%9F_M5StickC-scaled.jpg)
 
-![Ambient_ENV_5](https://kitto-yakudatsu.com/wp/wp-content/uploads/2019/10/P1180705.jpg)
+![Ambient_ENV_5](https://kitto-yakudatsu.com/wp/wp-content/uploads/2019/10/%E5%AD%90%E6%A9%9F_M5Stack-scaled.jpg)
 
 <br>
 
 # <当サンプルプログラムの対応機種>
 
 ## 親機用：「M5StickC」「M5StickC Plus」「M5StickC Plus2」
-M5StickC・M5StickC Plus・M5StickC Plus2は3種とも UIFlow-v1.13.1（2024/1/19時点の最新Ver）で検証。<br>
+M5StickC・M5StickC Plus・M5StickC Plus2は3種とも UIFlow-v1.13.4（2024/5/4時点の最新Ver）で検証。<br>
 
 <br>
 
@@ -62,8 +63,9 @@ Ambientへのデータ送信（記録）を使う場合は、[こちら](https:/
 
 <br>
 
-## 親機用プログラム本体「test_WiSUN_Ambient.py」**※必須**
+## 親機用プログラム本体「WiSUN_HAT_A1.py」または「WiSUN_HAT_C1.py」**※必須**
 M5StickC・M5StickC Plus・M5StickC Plus2用です。（プログラム内で機種自動判別させてます）<br>
+BP35A1用の「Wi-SUN HAT（無印）」向けが「WiSUN_HAT_A1.py」で、BP35C1-J11-T01用の「W-SUN HAT-C1」向けが「WiSUN_HAT_C1.py」となります。（プログラム本体は必要な方だけで転送すれば良いです）
 ※基板RevUpに伴い、UARTのピン割当てが変更されています。（[rev0.1] tx=0,rx=36 ⇒ [rev0.2] tx=0,rx=26）<br>
 Rev0.1（2020/8/30以前の販売分）の方は、341行目をアクティブにして、342行目をコメントアウトして下さい。<br>
 Rev0.2（2020/8/31以降の販売分）の方は、GitHubからダウンロードしたままで基本OKです。（341行目がコメントアウト、342行目がアクティブになっている筈）<br>
@@ -115,26 +117,26 @@ M5StickCのプログラム選択モード「APP.List」から起動させる為�
 
 <br>
 
-## M5StickC/Plus/Plus2版（親機）のボタン操作
+## M5StickC/Plus/Plus2版（親機）
 
 - Aボタン（M5ロゴの有るボタン）を押すと画面消灯します。もう一度押すと画面点灯します。（電力が警告値を超えてる場合は、強制点灯されます）
 - Bボタン（電源ボタンじゃない方の側面ボタン）を押すと表示が180度回転しますので、設置向きに合わせてお選び下さい。
+- M5StickC Plus/2の場合は、AボタンをダブルクリックするとBEEP音 ON/OFFをトグル選択します。（BEEP ONだと電力が警告値を超えた場合に警報音が鳴ります）
+- Ambient設定を行っている場合は左上に丸が表示されます。（2つとも設定してる場合は丸が2個表示）丸が枠だけの時は初回通信待ちの状態で、通信成功すると緑で塗り潰しされ、通信失敗すると赤で塗り潰しとなります。
 
-![M5StickC_1](https://kitto-yakudatsu.com/wp/wp-content/uploads/2019/10/P1180699.jpg)
-
-![M5StickC_2](https://kitto-yakudatsu.com/wp/wp-content/uploads/2019/10/P1180700.jpg)
+![M5StickC_1](https://kitto-yakudatsu.com/wp/wp-content/uploads/2019/10/%E8%A6%AA%E6%A9%9F_M5StickCPlus2-scaled.jpg)
 
 <br>
 
-## M5StickC/Plus/Plus2版（モニター子機）のボタン操作
+## M5StickC/Plus/Plus2版（モニター子機）
 
 - Aボタン（M5ロゴの有るボタン）を押すと画面消灯します。もう一度押すと画面点灯します。（電力が警告値を超えてる場合は、強制点灯されます）
 - Bボタン（電源ボタンじゃない方の側面ボタン）を押すと表示が180度回転しますので、設置向きに合わせてお選び下さい。
-- M5StickC Plusの場合は、AボタンをダブルクリックするとBEEP音 ON/OFFをトグル選択します。（BEEP ONだと電力が警告値を超えた場合に警報音が鳴ります）
+- M5StickC Plus/2の場合は、AボタンをダブルクリックするとBEEP音 ON/OFFをトグル選択します。（BEEP ONだと電力が警告値を超えた場合に警報音が鳴ります）
 
 <br>
 
-## M5Stack版（モニター子機）とM5Stack Core2版（モニター子機）のボタン操作
+## M5Stack版（モニター子機）とM5Stack Core2版（モニター子機）
 
 - Aボタン（3ボタンの左のボタンです）を押すと画面消灯します。もう一度押すと画面点灯します。（電力が警告値を超えてる場合は、強制点灯されます）
 - Bボタン（3ボタンの真ん中のボタンです）を押すと「瞬間電力値表示モード」と「30分毎積算電力量棒グラフ表示モード」の切り替えができます。（**30分毎積算電力量棒グラフは、親機からのESPNOW受信漏れが起こった場合は表示欠けになります。※再送要求処理はしておりません**）
@@ -148,6 +150,12 @@ M5StickCのプログラム選択モード「APP.List」から起動させる為�
 <br>
 
 # <アップデート履歴>
+
+## 【2024.05.04】 [WiSUN_HAT_A1.py][WiSUN_HAT_C1.py] Upload!
+* 親機用プログラムの更新。（各種リファクタと、時刻表示の廃止、ステータスマーカーの追加等）
+* 「Wi-SUN HAT-C1」の販売に併せて、親機用プログラム本体を改名。BP35A1用の「Wi-SUN HAT（無印）」向けが「WiSUN_HAT_A1.py」で、BP35C1-J11-T01用の「W-SUN HAT-C1」向けが「WiSUN_HAT_C1.py」としました。
+
+<br>
 
 ## 【2024.01.19】 [test_WiSUN_Ambient.py][test_WiSUN_view_m5stickc.py][test_WiSUN_view_m5stack.py][test_WiSUN_view_m5core2.py] Update!
 
