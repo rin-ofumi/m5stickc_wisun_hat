@@ -1,5 +1,5 @@
 # Wi-SUN HAT（BP35A1用）のサンプルプログラム
-# ver 0.0.1 (2024/5/4 Update)
+# ver 0.0.1a (2024/5/5 Update)
 # @rin-ofumi
 #
 # 確認した機種 (検証時のUIFlow Ver)
@@ -28,7 +28,7 @@ GET_NOW_P               = b'\x10\x81\x00\x01\x05\xFF\x01\x02\x88\x01\x62\x01\xE7
 GET_TOTAL_POWER_30      = b'\x10\x81\x00\x01\x05\xFF\x01\x02\x88\x01\x62\x01\xEA\x00'           #EA     *30分毎更新の積算電力量の要求
 
 # 変数宣言
-SCAN_COUNT              = 6     # ActiveScan count
+SCAN_COUNT              = 6     # ActiveScan試行回数
 channel                 = ''
 panid                   = ''
 macadr                  = ''
@@ -569,22 +569,34 @@ gc.collect()
 # Wi-SUNチャンネルスキャン（「Wi-SUN_SCAN.txt」の存在しない or 中身が異常値だった場合）
 if not wisun_scan_filechk() :
     #<Channel Scan>
-    scanOK = False   
-    print('>> Activescan start!')
+    scanOK = False
+    s_c = 1
     while not scanOK :
-        uart.write("SKSCAN 2 FFFFFFFF " + str(SCAN_COUNT) + "\r\n")
-        utime.sleep(0.5)
-        #スキャン1回分のループ処理
-        scanEnd = False
-        while not scanEnd :
+        uart.write('SKSCAN 2 FFFFFFFF 6\r\n')
+        # ROHMのBP35A1コマンドリファレンスより
+        # MODE         : 2（Paring IDあり）
+        # CHANNEL_MASK : FFFFFFFF（全チャンネルのスキャン）
+        # DURATION     : 6（0.624sec） [各チャンネルのスキャン時間 有効範囲:0-14 計算式:0.0096*(2^DURATION+1)sec]
+        utime.sleep(0.1)
+        while True :    #Echo back & OK wait!
             line = None
             if uart.any() != 0 :
                 line = uart.readline()
-                print('*')
+            if line is not None :
+                if ure.match('OK' , line.strip()) : # アクティブスキャンコマンドを受付た
+                    print('>> Activescan count:' + str(s_c) + ' start!')
+                    break
+        
+        #スキャン要求1回分の受信ループ処理
+        scan_res_end = False
+        while not scan_res_end :
+            line = None
+            if uart.any() != 0 :
+                line = uart.readline()
                 if line is not None :
-                    if ure.match("EVENT 22" , line.strip()) :
-                        print('-')
-                        scanEnd = True
+                    if ure.match("EVENT 22" , line.strip()) : # スキャン1周分が完了（見付かったかは別）
+                        print('>> Activescan count:' + str(s_c) + ' done!')
+                        scan_res_end = True                   # スキャンが1周完了してるのでループ抜け
                     elif ure.match("Channel:" , line.strip()) :
                         pickuptext = ure.compile(':') 
                         pickt = pickuptext.split(line.strip())
@@ -606,14 +618,16 @@ if not wisun_scan_filechk() :
                         lqi = str(pickt[1].strip(), 'utf-8')
                         print(" LQI= " + str(lqi))
                     print(line.strip())
-            utime.sleep(0.5)
+            utime.sleep(0.1)
             gc.collect()
         
-        SCAN_COUNT += 1
+        s_c+=1
         
-        if SCAN_COUNT > 10 :
+        if s_c > SCAN_COUNT : # アクティブスキャンの試行回数制限を超えた場合は、何らかの事情でスマートメーターが見付からないので環境を見直すべし！
             raise ValueError('Scan retry count over! Please Reboot!')
-        elif len(channel) == 2 and len(panid) == 4 and len(macadr) == 16 and len(lqi) == 2 :
+        
+        # スキャン結果の全ての情報が揃ってるかチェック
+        if len(channel) == 2 and len(panid) == 4 and len(macadr) == 16 and len(lqi) == 2 :
             with open('/flash/Wi-SUN_SCAN.txt' , 'w') as f:
                 f.write('Channel:' + str(channel) + '\r\n')
                 f.write('Pan_ID:' + str(panid) + '\r\n')

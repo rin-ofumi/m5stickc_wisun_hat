@@ -9,9 +9,8 @@ MicroPython project / Wi-SUN HAT & M5StickC / Data storage uses Ambient
 
 <br>
 
-* M5StickCとRHOM製Wi-SUN通信モジュール「BP35A1」または「BP35C1-J11-T01」を使って、家庭用スマートメーターをハックするプログラムです。
-* 「BP35A1」または「BP35C1-J11-T01」をM5StickCへ簡単に装着する為の「Wi-SUN HATキット」を使えば、半田付けもジャンパー線配線も無しで使えます。（「Wi-SUN HATキット」は[BOOTH](https://kitto-yakudatsu.booth.pm/items/1650727)と[スイッチサイエンス](https://www.switch-science.com/catalog/7612/)で販売中）
-※「BP35A1」用が「Wi-SUN HAT（無印）」で「BP35C1-J11-T01」用が「Wi-SUN HAT-C1」となります。（互換性無いので、注意してご購入下さい！）
+* M5StickCとROHM製Wi-SUN通信モジュール「BP35A1」または「BP35C1-J11-T01」を使って、家庭用スマートメーターから電力使用情報を取得するプログラムです。
+* 「BP35A1」または「BP35C1-J11-T01」をM5StickCへ簡単に装着する為の「Wi-SUN HATキット」を使えば、半田付けもジャンパー線配線も無しで使えます。（「Wi-SUN HATキット」は[BOOTH](https://kitto-yakudatsu.booth.pm/items/1650727)と[スイッチサイエンス](https://www.switch-science.com/catalog/7612/)で販売中です。「BP35A1」用が「Wi-SUN HAT（無印）」で「BP35C1-J11-T01」用が「Wi-SUN HAT-C1」となります。）
 * AmbientというIoTデータ可視化サービスを使って、記録を残すことも可能です。（無料枠で使えます）
 * MicroPythonで記述しています。
 
@@ -64,12 +63,14 @@ Ambientへのデータ送信（記録）を使う場合は、[こちら](https:/
 <br>
 
 ## 親機用プログラム本体「WiSUN_HAT_A1.py」または「WiSUN_HAT_C1.py」**※必須**
-M5StickC・M5StickC Plus・M5StickC Plus2用です。（プログラム内で機種自動判別させてます）<br>
-BP35A1用の「Wi-SUN HAT（無印）」向けが「WiSUN_HAT_A1.py」で、BP35C1-J11-T01用の「W-SUN HAT-C1」向けが「WiSUN_HAT_C1.py」となります。（プログラム本体は必要な方だけで転送すれば良いです）
-※基板RevUpに伴い、UARTのピン割当てが変更されています。（[rev0.1] tx=0,rx=36 ⇒ [rev0.2] tx=0,rx=26）<br>
-Rev0.1（2020/8/30以前の販売分）の方は、341行目をアクティブにして、342行目をコメントアウトして下さい。<br>
-Rev0.2（2020/8/31以降の販売分）の方は、GitHubからダウンロードしたままで基本OKです。（341行目がコメントアウト、342行目がアクティブになっている筈）<br>
+M5StickC・M5StickC Plus・M5StickC Plus2用です。（プログラム内で機種自動判別させているので、プログラムは3機種とも共通です。）<br>
+<br>
+BP35A1用の「Wi-SUN HAT（無印）」向けが「WiSUN_HAT_A1.py」で、<br>
+BP35C1-J11-T01用の「W-SUN HAT-C1」向けが「WiSUN_HAT_C1.py」となります。<br>
 M5StickCのプログラム選択モード「APP.List」から起動させる為、親機のM5StickCの「Apps」配下に保存して下さい。<br>
+<br>
+※基板RevUpに伴い、UARTのピン割当てが変更されています。（[rev0.1] tx=0,rx=36 ⇒ [rev0.2以降] tx=0,rx=26）<br>
+それぞれのRevに併せて、UART設定の行のコメントアウトを入替えて下さい。（初期状態はRev0.2以降用にしてあります。）<br>
 
 <br>
 
@@ -150,6 +151,11 @@ M5StickCのプログラム選択モード「APP.List」から起動させる為�
 <br>
 
 # <アップデート履歴>
+
+## 【2024.05.05】 [WiSUN_HAT_A1.py] Update!
+* 親機用プログラム「WiSUN_HAT_A1.py」の更新。（チャンネルスキャン処理の修正）
+
+<br>
 
 ## 【2024.05.04】 [WiSUN_HAT_A1.py][WiSUN_HAT_C1.py] Upload!
 * 親機用プログラムの更新。（各種リファクタと、時刻表示の廃止、ステータスマーカーの追加等）
